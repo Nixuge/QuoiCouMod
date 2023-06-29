@@ -1,0 +1,69 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "http://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath files('forgegradle/ForgeGradle-2.1.2.jar')
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'eclipse'
+
+version = mod_version
+group = mod_group
+archivesBaseName = mod_id
+
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+minecraft {
+    version = "${minecraft_version}-${forge_version}"
+    runDir = "run"
+    mappings = mappings_version
+}
+
+runClient {
+	args = ["--username", dev_username]
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    embed
+    compile.extendsFrom(embed)
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.18'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        expand 'mod_id': mod_id, 'mod_name': mod_name, 'version': project.version,
+                'mcversion': project.minecraft.version, 'mod_description': mod_description,
+                'mod_author': mod_author
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+jar {
+    from(configurations.embed.collect {
+        it.isDirectory() ? it : zipTree(it)
+    }) {
+        exclude "LICENSE.txt", "META-INF/MANIFSET.MF", "META-INF/maven/**", "META-INF/*.RSA", "META-INF/*.SF"
+    }
+}
