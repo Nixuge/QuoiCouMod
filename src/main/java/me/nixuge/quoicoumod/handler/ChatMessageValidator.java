@@ -80,10 +80,23 @@ public class ChatMessageValidator {
                 matches.add(entry.getValue());
         }
 
-        if (matches.size() > 0)
-            return matches.get(random.nextInt(matches.size()));
+        if (matches.size() > 0) 
+            return grabPrefix() + matches.get(random.nextInt(matches.size()));
         
         return null;
+    }
+
+    private String grabPrefix() {
+        ServerData sd = mc.getCurrentServerData();
+        if (sd == null)
+            return "";
+        String ip = sd.serverIP;
+
+        for (Entry<String, String> entry : config.getPrefixesMap().entrySet()) {
+            if (ip.contains(entry.getKey()))
+                return entry.getValue();
+        }
+        return "";
     }
 
     public String getAnswer() {

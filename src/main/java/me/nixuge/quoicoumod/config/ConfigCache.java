@@ -20,6 +20,8 @@ public class ConfigCache {
     private String[] serverList;
     private String[] textAnswerList;
     private Map<char[], String> textAnswerMap;
+    private String[] prefixesList;
+    private Map<String, String> prefixesMap;
 
     public ConfigCache(final Configuration configuration) {
         this.configuration = configuration;
@@ -39,12 +41,25 @@ public class ConfigCache {
     private void genTextAnswerMap() {
         this.textAnswerMap = new HashMap<>();
         for (String string : textAnswerList) {
-            String[] data = string.toLowerCase().split("=");
+            String[] data = string.toLowerCase().split("=", 2);
             if (data.length != 2) {
-                Logger.getLogger("QuoiCouMod").warning("String " + textAnswerList + " isn't valid !");
+                Logger.getLogger("QuoiCouMod").warning("(genTextAnswerMap)String " + string + " isn't valid !");
+                Logger.getLogger("QuoiCouMod").warning(data.length + "");
                 continue;
             }
             textAnswerMap.put(invertArray(data[0].toCharArray()), data[1]);
+        }
+    }
+
+    private void genPrefixesMap() {
+        this.prefixesMap = new HashMap<>();
+        for (String string : prefixesList) {
+            String[] data = string.toLowerCase().split("=", 2);
+            if (data.length != 2) {
+                Logger.getLogger("QuoiCouMod").warning("(genPrefixesMap)String " + string + " isn't valid !");
+                continue;
+            }
+            prefixesMap.put(data[0], data[1]);
         }
     }
 
@@ -83,6 +98,14 @@ public class ConfigCache {
                 "What messages ends to answer to and with what answer. Format with MESSAGE=ANSWER."
         );
         genTextAnswerMap();
+
+        this.prefixesList = this.configuration.getStringList(
+                "Prefixes List",
+                "General",
+                new String[]{},
+                "The prefix to use when answering on different servers. Format with SERVER=PREFIX."
+        );
+        genPrefixesMap();
     }
 
     @SubscribeEvent
